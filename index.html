@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#F5EFE0">
+<meta name="description" content="墨练 · 数字宣纸风格的中文钢笔字练习网页">
+<title>墨练 · 数字宣纸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3/dist/hanzi-writer.min.js"></script>
+<style>
+/* ============================================================
+   墨练 · 数字宣纸设计系统（P0 总纲铁律）
+   色板：宣纸米白 / 墨色 / 朱砂红 / 黛青 —— 四色封顶，不得自创
+   ============================================================ */
+:root{
+  --paper:#F5EFE0;
+  --paper-raised:#FAF6EB;
+  --ink:#221E1A;
+  --cinnabar:#A63A2E;
+  --daiqing:#4A5B6A;
+  --ink-08:rgba(34,30,26,.08);
+  --ink-12:rgba(34,30,26,.12);
+  --ink-20:rgba(34,30,26,.20);
+  --ink-30:rgba(34,30,26,.30);
+  --ink-45:rgba(34,30,26,.45);
+  --grid-dash:rgba(34,30,26,.16);
+  --grid-solid:rgba(34,30,26,.32);
+  --skeleton:rgba(34,30,26,.10);
+  --font-title:"Ma Shan Zheng","STKaiti","KaiTi",serif;
+  --font-xing:"Zhi Mang Xing","STKaiti",cursive;
+  --font-kai:"KaiTi","STKaiti","Kaiti SC","DFKai-SB","BiauKai",serif;
+  --font-body:"Noto Serif SC","Songti SC","SimSun",serif;
+  --font-num:Georgia,"Times New Roman",serif;
+  --radius:3px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --dur:.3s;
+}
+[data-theme="dark"]{
+  --paper:#1C1A17;
+  --paper-raised:#26211C;
+  --ink:#EDE6D8;
+  --daiqing:#8B9AA6;
+  --ink-08:rgba(237,230,216,.08);
+  --ink-12:rgba(237,230,216,.13);
+  --ink-20:rgba(237,230,216,.20);
+  --ink-30:rgba(237,230,216,.30);
+  --ink-45:rgba(237,230,216,.50);
+  --grid-dash:rgba(237,230,216,.16);
+  --grid-solid:rgba(237,230,216,.34);
+  --skeleton:rgba(237,230,216,.10);
+}
+/* ---------- 基础 ---------- */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.75;
+  transition:background var(--dur) var(--ease),color var(--dur) var(--ease);
+}
+::selection{background:rgba(166,58,46,.22)}
+:focus-visible{outline:2px solid var(--cinnabar);outline-offset:2px;border-radius:2px}
+button{font:inherit;color:inherit}
+img{max-width:100%}
+/* 宣纸纹理：噪点 + 极淡斜纹，透明度低于 6% */
+.texture{
+  position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+[data-theme="dark"] .texture{mix-blend-mode:screen;opacity:.045}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(-45deg,transparent 0 7px,var(--ink-08) 7px 8px);
+  opacity:.6;
+}
+.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 24px}
+.ic{width:18px;height:18px;flex:none}
+.ic-lg{width:22px;height:22px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* ---------- 视图切换 ---------- */
+.view{display:none}
+.view.active{display:block;animation:viewIn var(--dur) var(--ease)}
+@keyframes viewIn{from{opacity:0}to{opacity:1}}
+/* ---------- 页头 ---------- */
+.site-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:26px 0 18px}
+.brand{display:flex;align-items:center;gap:12px;background:none;border:0;padding:0;cursor:pointer}
+.brand-name{font-family:var(--font-title);font-size:30px;letter-spacing:.14em;line-height:1}
+.brand-seal{width:34px;height:34px;color:var(--cinnabar)}
+.site-nav{display:flex;align-items:center;gap:4px}
+.nav-link{
+  display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border:0;border-radius:var(--radius);
+  background:transparent;color:var(--daiqing);font-size:15px;cursor:pointer;position:relative;
+  transition:color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.nav-link:hover{color:var(--ink);background:var(--ink-08)}
+.nav-link.active{color:var(--ink)}
+.nav-link.active::after{
+  content:"";position:absolute;left:13px;right:13px;bottom:2px;height:2px;background:var(--cinnabar);border-radius:1px;
+}
+.icon-btn{
+  display:inline-grid;place-items:center;width:40px;height:40px;border:1px solid var(--ink-12);
+  border-radius:var(--radius);background:transparent;cursor:pointer;
+  transition:border-color var(--dur) var(--ease),background var(--dur) var(--ease),color var(--dur) var(--ease);
+}
+.icon-btn:hover{border-color:var(--ink-30);background:var(--ink-08)}
+/* ---------- 按钮 ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:9px 16px;border:1px solid var(--ink-12);border-radius:var(--radius);
+  background:transparent;color:var(--ink);font-size:14px;cursor:pointer;
+  transition:border-color var(--dur) var(--ease),background var(--dur) var(--ease),color var(--dur) var(--ease),opacity var(--dur) var(--ease);
+}
+.btn:hover{border-color:var(--ink-30);background:var(--ink-08)}
+.btn-primary{background:var(--cinnabar);border-color:var(--cinnabar);color:#F5EFE0}
+.btn-primary:hover{background:var(--cinnabar);border-color:var(--cinnabar);opacity:.92}
+.btn-danger{color:var(--cinnabar);border-color:rgba(166,58,46,.4)}
+.btn-danger:hover{border-color:var(--cinnabar);background:rgba(166,58,46,.08)}
+.btn[aria-pressed="true"]{border-color:var(--cinnabar);color:var(--cinnabar)}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.38;pointer-events:none}
+.btn-sm{padding:6px 12px;font-size:13px}
+/* 分段控件 */
+.seg{display:inline-flex;border:1px solid var(--ink-12);border-radius:var(--radius);overflow:hidden;background:var(--paper-raised)}
+.seg button{
+  padding:8px 15px;border:0;background:transparent;color:var(--daiqing);font-size:14px;cursor:pointer;
+  transition:color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.seg button + button{border-left:1px solid var(--ink-12)}
+.seg button:hover{color:var(--ink);background:var(--ink-08)}
+.seg button[aria-pressed="true"]{color:var(--cinnabar);background:var(--ink-08)}
+.seg-compact button{padding:6px 12px;font-size:13px}
+/* ---------- 卡片与空态 ---------- */
+.card{background:var(--paper-raised);border:1px solid var(--ink-12);border-radius:var(--radius)}
+.empty{text-align:center;padding:72px 16px;color:var(--daiqing)}
+.empty .ic{width:40px;height:40px;margin-bottom:14px;opacity:.5}
+.empty p{margin:0 0 20px}
+.empty .btn{margin-top:4px}
+.section-title{
+  display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  font-family:var(--font-title);font-size:24px;letter-spacing:.08em;margin:0 0 8px;
+}
+.section-note{color:var(--daiqing);font-size:13px;margin:0 0 24px}
+.section-gap{height:96px}
+/* ============================================================
+   首页（P3）
+   ============================================================ */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:72px;align-items:center;padding:40px 0 96px}
+.hero-left{display:flex;align-items:flex-start;gap:26px}
+.hero-title{
+  writing-mode:vertical-rl;font-family:var(--font-title);font-size:76px;line-height:1.05;
+  letter-spacing:.18em;margin:0;user-select:none;
+}
+.hero-side{display:flex;flex-direction:column;align-items:center;gap:20px;padding-top:8px}
+.hero-seal{width:62px;height:62px;color:var(--cinnabar)}
+.hero-slogan{
+  writing-mode:vertical-rl;font-size:14px;letter-spacing:.55em;color:var(--daiqing);margin:0;
+}
+.hero-right{min-width:0}
+.today-eyebrow{
+  display:flex;align-items:center;gap:10px;color:var(--daiqing);font-size:13px;
+  letter-spacing:.28em;margin:0 0 18px;
+}
+.today-eyebrow::after{content:"";flex:1;height:1px;background:var(--ink-12)}
+.today-card{
+  display:flex;align-items:center;gap:34px;padding:34px;cursor:pointer;text-align:left;width:100%;
+  transition:border-color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.today-card:hover{border-color:var(--ink-30);background:var(--ink-08)}
+.today-grid{position:relative;width:168px;height:168px;flex:none}
+.today-grid svg{position:absolute;inset:0;width:100%;height:100%}
+.today-char{
+  position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-title);
+  font-size:112px;line-height:1;color:var(--ink);opacity:.15;user-select:none;
+}
+.today-info{min-width:0}
+.today-char-big{font-family:var(--font-title);font-size:56px;line-height:1.1}
+.today-pinyin{font-family:var(--font-num);font-style:italic;color:var(--daiqing);font-size:15px;margin:2px 0 12px}
+.today-meaning{margin:0;color:var(--ink);font-size:15px}
+.today-cta{display:inline-flex;align-items:center;gap:6px;margin-top:18px;color:var(--cinnabar);font-size:14px}
+/* 搜索 */
+.search-row{display:flex;gap:12px;align-items:stretch;max-width:520px}
+.search-box{
+  flex:1;display:flex;align-items:center;gap:10px;padding:0 14px;height:46px;
+  border:1px solid var(--ink-12);border-radius:var(--radius);background:var(--paper-raised);
+  transition:border-color var(--dur) var(--ease);
+}
+.search-box:focus-within{border-color:var(--ink-30)}
+.search-box .ic{color:var(--daiqing)}
+.search-box input{
+  flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink);
+  font-family:var(--font-body);font-size:15px;
+}
+.search-box input::placeholder{color:var(--ink-45)}
+.search-clear{
+  display:grid;place-items:center;width:26px;height:26px;border:0;border-radius:var(--radius);
+  background:transparent;color:var(--daiqing);cursor:pointer;transition:color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.search-clear:hover{color:var(--ink);background:var(--ink-08)}
+/* 分类页签 */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 8px}
+.tab{
+  padding:8px 18px;border:1px solid transparent;border-radius:var(--radius);background:transparent;
+  color:var(--daiqing);font-size:15px;cursor:pointer;
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.tab:hover{color:var(--ink);background:var(--ink-08)}
+.tab[aria-selected="true"]{color:var(--cinnabar);border-color:var(--cinnabar)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 20px}
+.chip{
+  padding:5px 13px;border:1px solid var(--ink-12);border-radius:999px;background:transparent;
+  color:var(--daiqing);font-size:13px;cursor:pointer;
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.chip:hover{color:var(--ink);border-color:var(--ink-30)}
+.chip[aria-pressed="true"]{color:var(--cinnabar);border-color:var(--cinnabar);background:rgba(166,58,46,.06)}
+/* 字卡网格 */
+.char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:12px}
+.char-card{
+  position:relative;aspect-ratio:1/1;display:grid;place-items:center;padding:0;
+  background:var(--paper-raised);border:1px solid var(--ink-12);border-radius:var(--radius);
+  font-family:var(--font-title);font-size:34px;line-height:1;color:var(--ink);cursor:pointer;
+  transition:border-color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.char-card:hover{border-color:var(--ink-30);background:var(--ink-08)}
+.char-card .fav-btn{position:absolute;top:3px;right:3px}
+.fav-btn{
+  display:grid;place-items:center;width:28px;height:28px;border:0;border-radius:var(--radius);
+  background:transparent;color:var(--ink-45);cursor:pointer;
+  transition:color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.fav-btn:hover{color:var(--ink);background:var(--ink-08)}
+.fav-btn .ic{width:15px;height:15px}
+.fav-btn.on{color:var(--cinnabar)}
+.fav-btn.on .ic{fill:var(--cinnabar)}
+/* ============================================================
+   练习页（P1 / P2）
+   ============================================================ */
+.practice-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 0 6px}
+.back-link{
+  display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--daiqing);
+  font-size:14px;cursor:pointer;padding:8px 10px;border-radius:var(--radius);
+  transition:color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.back-link:hover{color:var(--ink);background:var(--ink-08)}
+.practice-title{font-family:var(--font-title);font-size:22px;letter-spacing:.1em;margin:0}
+.mode-row{display:flex;justify-content:center;margin:26px 0 30px}
+/* 字格舞台 */
+.stage{
+  position:relative;width:min(480px,calc(100vw - 96px));aspect-ratio:1/1;margin:0 auto;
+  background:var(--paper-raised);border:1px solid var(--ink-12);border-radius:var(--radius);
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+}
+.stage > canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage > .layer{position:absolute;inset:0}
+#modelChar{
+  display:grid;place-items:center;font-size:76%;line-height:1;color:var(--ink);opacity:.15;
+  font-family:var(--model-font,var(--font-title));user-select:none;pointer-events:none;
+  transition:opacity var(--dur) var(--ease);
+}
+#modelChar.is-hidden{opacity:0}
+#writerHost{display:none;touch-action:none}
+.stage.writer-mode #writerHost{display:block}
+.stage.writer-mode #inkCanvas{pointer-events:none}
+.stage.flash-miss{border-color:var(--cinnabar)}
+.stage-loading,.stage-fallback,.stage-guide{
+  display:none;place-items:center;text-align:center;padding:28px;background:var(--paper-raised);
+}
+.stage-loading.show,.stage-fallback.show,.stage-guide.show{display:grid}
+.stage-loading p,.stage-fallback p{margin:0;color:var(--daiqing);font-size:14px}
+.skeleton-char{
+  width:64px;height:64px;margin:0 auto 16px;border:1px solid var(--ink-12);border-radius:var(--radius);
+  background:linear-gradient(100deg,transparent 20%,var(--skeleton) 50%,transparent 80%);
+  background-size:200% 100%;animation:shimmer 1.4s linear infinite;
+}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+.stage-fallback .btn{margin-top:18px}
+.stage-guide p{margin:0 0 6px;color:var(--daiqing);font-size:14px}
+.stage-guide .btn{margin-top:16px}
+/* 舞台信息行 */
+.stage-meta{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  max-width:min(480px,calc(100vw - 96px));margin:22px auto 0;
+}
+.meta-left{display:flex;align-items:baseline;gap:10px;min-width:0}
+.meta-char{font-family:var(--font-title);font-size:24px;line-height:1}
+.meta-pinyin{font-family:var(--font-num);font-style:italic;color:var(--daiqing);font-size:14px}
+.meta-right{display:flex;align-items:center;gap:14px}
+.counter{font-family:var(--font-num);color:var(--daiqing);font-size:13px;letter-spacing:.06em;white-space:nowrap}
+/* 工具栏 */
+.toolbar{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 14px;
+  max-width:640px;margin:34px auto 0;
+}
+.toolbar .seg-label{color:var(--daiqing);font-size:13px;margin-right:-6px}
+.shortcut-hint{
+  text-align:center;color:var(--daiqing);font-size:12px;letter-spacing:.08em;margin:22px 0 0;
+}
+/* 笔顺演示控制条 */
+.stroke-controls{
+  display:flex;align-items:center;justify-content:center;gap:12px;margin:26px auto 0;max-width:640px;
+}
+.stage-blocked{display:none}
+/* ============================================================
+   记录页（P4）
+   ============================================================ */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:36px 0 8px}
+.stat{padding:26px 20px;text-align:center}
+.stat-num{font-family:var(--font-num);font-size:44px;line-height:1.1;color:var(--ink)}
+.stat-label{color:var(--daiqing);font-size:13px;letter-spacing:.14em;margin-top:6px}
+.rec-day{margin-top:44px}
+.rec-day-title{
+  display:flex;align-items:baseline;gap:12px;font-family:var(--font-title);font-size:19px;
+  letter-spacing:.1em;margin:0 0 16px;
+}
+.rec-day-title span{font-family:var(--font-num);font-style:italic;color:var(--daiqing);font-size:12px;letter-spacing:0}
+.rec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:14px}
+.rec-item{
+  position:relative;aspect-ratio:1/1;padding:0;overflow:hidden;cursor:pointer;
+  background:var(--paper-raised);border:1px solid var(--ink-12);border-radius:var(--radius);
+  transition:border-color var(--dur) var(--ease);
+}
+.rec-item:hover{border-color:var(--ink-30)}
+.rec-item img{width:100%;height:100%;object-fit:cover;display:block}
+.rec-item .rec-tag{
+  position:absolute;left:8px;bottom:8px;font-family:var(--font-title);font-size:18px;color:#F5EFE0;
+  background:rgba(34,30,26,.55);border-radius:2px;padding:0 7px;line-height:1.5;
+}
+/* ============================================================
+   设置抽屉（P5）
+   ============================================================ */
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(360px,92vw);z-index:60;
+  background:var(--paper);border-left:1px solid var(--ink-12);
+  transform:translateX(102%);transition:transform var(--dur) var(--ease);
+  padding:26px 26px 40px;overflow-y:auto;
+}
+.drawer.open{transform:none}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.drawer-title{font-family:var(--font-title);font-size:24px;letter-spacing:.12em;margin:0}
+.drawer-section{padding:22px 0;border-bottom:1px solid var(--ink-08)}
+.drawer-section:last-child{border-bottom:0}
+.drawer-label{color:var(--daiqing);font-size:13px;letter-spacing:.12em;margin:0 0 12px}
+.drawer-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.drawer-btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.backdrop{
+  position:fixed;inset:0;z-index:55;background:rgba(34,30,26,.38);
+  opacity:0;pointer-events:none;transition:opacity var(--dur) var(--ease);
+}
+[data-theme="dark"] .backdrop{background:rgba(0,0,0,.5)}
+.backdrop.show{opacity:1;pointer-events:auto}
+.switch{
+  position:relative;width:46px;height:26px;border:1px solid var(--ink-12);border-radius:999px;
+  background:var(--paper-raised);cursor:pointer;transition:border-color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.switch::after{
+  content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+  background:var(--ink-45);transition:transform var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.switch[aria-checked="true"]{border-color:var(--cinnabar)}
+.switch[aria-checked="true"]::after{transform:translateX(20px);background:var(--cinnabar)}
+/* ============================================================
+   自定义弹层（替代 alert/confirm）
+   ============================================================ */
+.modal-layer{
+  position:fixed;inset:0;z-index:70;display:none;place-items:center;padding:24px;
+  background:rgba(34,30,26,.42);
+}
+[data-theme="dark"] .modal-layer{background:rgba(0,0,0,.55)}
+.modal-layer.show{display:grid;animation:viewIn var(--dur) var(--ease)}
+.modal-card{
+  width:min(560px,100%);max-height:86vh;overflow:auto;background:var(--paper);
+  border:1px solid var(--ink-12);border-radius:var(--radius);padding:26px;
+}
+.modal-card.confirm{width:min(420px,100%)}
+.modal-title{font-family:var(--font-title);font-size:22px;letter-spacing:.1em;margin:0 0 12px}
+.modal-body{color:var(--ink);font-size:14px;margin:0}
+.modal-body.dim{color:var(--daiqing)}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}
+.record-view-img{
+  width:100%;aspect-ratio:1/1;object-fit:contain;background:var(--paper-raised);
+  border:1px solid var(--ink-12);border-radius:var(--radius);image-rendering:auto;
+}
+.record-view-meta{display:flex;align-items:baseline;gap:12px;margin:16px 0 4px}
+.record-view-meta .meta-char{font-size:26px}
+/* ---------- Toast ---------- */
+.toast-host{
+  position:fixed;left:50%;bottom:30px;transform:translateX(-50%);z-index:90;
+  display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;width:max-content;max-width:92vw;
+}
+.toast{
+  display:flex;align-items:center;gap:10px;padding:11px 18px;
+  background:var(--paper-raised);border:1px solid var(--ink-12);border-left:3px solid var(--cinnabar);
+  border-radius:var(--radius);font-size:14px;color:var(--ink);
+  opacity:0;transform:translateY(8px);transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease);
+  box-shadow:none;
+}
+.toast.show{opacity:1;transform:none}
+/* ---------- 响应式 ---------- */
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr;gap:48px;padding:24px 0 72px}
+  .hero-left{justify-content:flex-start}
+  .hero-title{font-size:56px}
+  .today-card{flex-direction:column;text-align:center;gap:22px;padding:26px}
+  .today-grid{width:132px;height:132px}
+  .today-char{font-size:88px}
+  .nav-link .nav-text{display:none}
+  .nav-link{padding:8px 10px}
+  .stats{grid-template-columns:repeat(3,1fr);gap:10px}
+  .stat{padding:18px 8px}
+  .stat-num{font-size:32px}
+  .stat-label{font-size:12px;letter-spacing:.08em}
+  .section-gap{height:72px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+<div class="texture" aria-hidden="true"></div>
+<div class="backdrop" id="drawerBackdrop"></div>
+<div class="wrap">
+  <!-- ================= 页头 ================= -->
+  <header class="site-head">
+    <button class="brand" id="brandHome" aria-label="返回墨练首页">
+      <svg class="brand-seal" viewBox="0 0 64 64" aria-hidden="true">
+        <rect x="3" y="3" width="58" height="58" rx="7" fill="none" stroke="currentColor" stroke-width="4"/>
+        <text x="32" y="28" text-anchor="middle" font-size="24" fill="currentColor" font-family="var(--font-title)">墨</text>
+        <text x="32" y="53" text-anchor="middle" font-size="24" fill="currentColor" font-family="var(--font-title)">练</text>
+      </svg>
+      <span class="brand-name">墨练</span>
+    </button>
+    <nav class="site-nav" aria-label="主导航">
+      <button class="nav-link active" id="navHome" data-view="home">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+        <span class="nav-text">首页</span>
+      </button>
+      <button class="nav-link" id="navPractice" data-view="practice">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        <span class="nav-text">练习</span>
+      </button>
+      <button class="nav-link" id="navRecords" data-view="records">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>
+        <span class="nav-text">记录</span>
+      </button>
+      <button class="icon-btn" id="btnSettings" aria-label="打开设置">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="7" cy="17" r="2"/></svg>
+      </button>
+    </nav>
+  </header>
+  <main id="app">
+    <!-- ================= 首页 · 选字（P3） ================= -->
+    <section class="view active" id="view-home" aria-label="选字首页">
+      <div class="hero">
+        <div class="hero-left">
+          <h1 class="hero-title">墨练</h1>
+          <div class="hero-side">
+            <svg class="hero-seal" viewBox="0 0 64 64" aria-hidden="true">
+              <rect x="4" y="4" width="56" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="4.5"/>
+              <text x="32" y="29" text-anchor="middle" font-size="25" fill="currentColor" font-family="var(--font-title)">墨</text>
+              <text x="32" y="54" text-anchor="middle" font-size="25" fill="currentColor" font-family="var(--font-title)">练</text>
+            </svg>
+            <p class="hero-slogan">一横一竖，皆是功夫</p>
+          </div>
+        </div>
+        <div class="hero-right">
+          <p class="today-eyebrow">今日荐字</p>
+          <button class="today-card card" id="todayCard">
+            <div class="today-grid">
+              <div class="today-char" id="todayChar">永</div>
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <rect x="1" y="1" width="98" height="98" fill="none" stroke="currentColor" stroke-opacity=".32" stroke-width="1.5"/>
+                <line x1="50" y1="1" x2="50" y2="99" stroke="currentColor" stroke-opacity=".16" stroke-width="1" stroke-dasharray="4 4"/>
+                <line x1="1" y1="50" x2="99" y2="50" stroke="currentColor" stroke-opacity=".16" stroke-width="1" stroke-dasharray="4 4"/>
+              </svg>
+            </div>
+            <div class="today-info">
+              <div class="today-char-big" id="todayCharBig">永</div>
+              <div class="today-pinyin" id="todayPinyin">yong</div>
+              <p class="today-meaning" id="todayMeaning">永字八法，一笔一画见功夫。</p>
+              <span class="today-cta">开始练习
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="section-gap" aria-hidden="true"></div>
+
+      <section aria-label="字库">
+        <h2 class="section-title">字库</h2>
+        <p class="section-note" id="libCount">共收录 0 字 · 支持汉字与拼音搜索</p>
+        <div class="search-row">
+          <div class="search-box">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input id="searchInput" type="text" placeholder="搜汉字或拼音，如「山」或「shan」" autocomplete="off" aria-label="搜索汉字或拼音">
+            <button class="search-clear" id="searchClear" aria-label="清空搜索" hidden>
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="tabs" id="tabBar" role="tablist" aria-label="字库分类">
+          <button class="tab" role="tab" data-tab="common" aria-selected="true">常用字</button>
+          <button class="tab" role="tab" data-tab="all" aria-selected="false" hidden>全部汉字</button>
+          <button class="tab" role="tab" data-tab="school" aria-selected="false">小学同步</button>
+          <button class="tab" role="tab" data-tab="radical" aria-selected="false">部首检索</button>
+          <button class="tab" role="tab" data-tab="fav" aria-selected="false">收藏</button>
+        </div>
+        <div class="chips" id="chipRow" hidden></div>
+        <div class="char-grid" id="charGrid"></div>
+        <div id="loadMoreWrap" hidden style="text-align:center;margin-top:28px">
+          <button class="btn" id="btnLoadMore" type="button">显示更多</button>
+        </div>
+        <div class="empty" id="homeEmpty" hidden>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5M8 11h6"/></svg>
+          <p id="homeEmptyText">没有找到匹配的字</p>
+        </div>
+      </section>
+      <div style="height:96px" aria-hidden="true"></div>
+    </section>
+    <!-- ================= 练习页（P1 / P2） ================= -->
+    <section class="view" id="view-practice" aria-label="练习">
+      <div class="practice-head">
+        <button class="back-link" id="practiceBack">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+          返回首页
+        </button>
+        <h2 class="practice-title" id="practiceTitle">练习</h2>
+      </div>
+
+      <div class="mode-row">
+        <div class="seg" id="modeSeg" role="group" aria-label="练习模式">
+          <button type="button" data-mode="free" aria-pressed="true">自由书写</button>
+          <button type="button" data-mode="demo" aria-pressed="false">笔顺演示</button>
+          <button type="button" data-mode="quiz" aria-pressed="false">描红跟练</button>
+        </div>
+      </div>
+
+      <div class="stage" id="stage">
+        <div class="layer" id="modelChar" aria-hidden="true">永</div>
+        <canvas id="gridCanvas" aria-hidden="true"></canvas>
+        <canvas id="inkCanvas" role="img" aria-label="书写画布"></canvas>
+        <div class="layer" id="writerHost"></div>
+        <div class="layer stage-loading" id="stageLoading">
+          <div>
+            <div class="skeleton-char" aria-hidden="true"></div>
+            <p>笔顺数据加载中……</p>
+          </div>
+        </div>
+        <div class="layer stage-fallback" id="stageFallback">
+          <div>
+            <p>该字暂无笔顺数据，<br>可直接描红临写</p>
+            <button class="btn" id="btnFallbackFree" type="button">回到自由书写</button>
+          </div>
+        </div>
+        <div class="layer stage-guide" id="stageGuide">
+          <div>
+            <p>还没有选择要练习的字</p>
+            <p style="font-size:13px">去首页挑一个字，从这里开始</p>
+            <button class="btn btn-primary" id="btnGuideHome" type="button">去首页选字</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-meta" id="stageMeta" hidden>
+        <div class="meta-left">
+          <span class="meta-char" id="metaChar">永</span>
+          <span class="meta-pinyin" id="metaPinyin">yong</span>
+          <button class="fav-btn" id="metaFav" type="button" aria-label="收藏此字" aria-pressed="false">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></svg>
+          </button>
+        </div>
+        <div class="meta-right">
+          <span class="counter" id="strokeCounter"></span>
+        </div>
+      </div>
+
+      <div class="stroke-controls" id="strokeControls" hidden>
+        <button class="btn" id="btnPlay" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
+          <span id="btnPlayText">播放</span>
+        </button>
+        <button class="btn" id="btnReplay" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg>
+          重播
+        </button>
+        <button class="btn" id="btnQuizRestart" type="button" hidden>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg>
+          重新开始
+        </button>
+      </div>
+
+      <div class="toolbar" id="toolbar">
+        <span class="seg-label">笔墨</span>
+        <div class="seg seg-compact" id="penSeg" role="group" aria-label="笔墨粗细">
+          <button type="button" data-level="fine" aria-pressed="false">细</button>
+          <button type="button" data-level="mid" aria-pressed="true">中</button>
+          <button type="button" data-level="bold" aria-pressed="false">粗</button>
+        </div>
+        <span class="seg-label">格线</span>
+        <div class="seg seg-compact" id="gridSeg" role="group" aria-label="格线类型">
+          <button type="button" data-grid="tian" aria-pressed="true">田字格</button>
+          <button type="button" data-grid="mi" aria-pressed="false">米字格</button>
+          <button type="button" data-grid="none" aria-pressed="false">无</button>
+        </div>
+        <div class="seg seg-compact" id="modelSeg" role="group" aria-label="范字显示">
+          <button type="button" id="btnModel" aria-pressed="true">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg>
+            范字
+          </button>
+        </div>
+        <button class="btn" id="btnUndo" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12H8"/></svg>
+          撤销
+        </button>
+        <button class="btn" id="btnClear" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          清空
+        </button>
+        <button class="btn btn-primary" id="btnSave" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+          保存 PNG
+        </button>
+      </div>
+      <p class="shortcut-hint">Ctrl+Z 撤销 · Ctrl+S 保存 PNG · 保存的作品会自动记入练习记录</p>
+    </section>
+    <!-- ================= 记录页（P4） ================= -->
+    <section class="view" id="view-records" aria-label="练习记录">
+      <div class="practice-head">
+        <button class="back-link" id="recordsBack">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+          返回首页
+        </button>
+        <h2 class="practice-title">练习记录</h2>
+      </div>
+      <div class="stats">
+        <div class="stat card"><div class="stat-num" id="statsTotal">0</div><div class="stat-label">累计练习（次）</div></div>
+        <div class="stat card"><div class="stat-num" id="statsDays">0</div><div class="stat-label">坚持（天）</div></div>
+        <div class="stat card"><div class="stat-num" id="statsFav">0</div><div class="stat-label">收藏（字）</div></div>
+      </div>
+      <div id="recordsList"></div>
+      <div class="empty" id="recordsEmpty" hidden>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+        <p>还没有练习记录，写完一字，点「保存 PNG」即自动记档</p>
+        <button class="btn btn-primary" id="btnRecordsPractice" type="button">去练习</button>
+      </div>
+      <div style="height:96px" aria-hidden="true"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= 设置抽屉（P5） ================= -->
+<aside class="drawer" id="drawer" aria-label="设置" aria-hidden="true">
+  <div class="drawer-head">
+    <h2 class="drawer-title">设置</h2>
+    <button class="icon-btn" id="btnDrawerClose" aria-label="关闭设置">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="drawer-section">
+    <p class="drawer-label">主题</p>
+    <div class="seg" id="themeSeg" role="group" aria-label="主题模式">
+      <button type="button" data-theme-v="light" aria-pressed="true">宣纸日间</button>
+      <button type="button" data-theme-v="dark" aria-pressed="false">墨色夜间</button>
+    </div>
+  </div>
+  <div class="drawer-section">
+    <p class="drawer-label">范字字体</p>
+    <div class="seg seg-compact" id="fontSeg" role="group" aria-label="范字字体">
+      <button type="button" data-font-v="ma" aria-pressed="true">马善政楷书</button>
+      <button type="button" data-font-v="xing" aria-pressed="false">志莽行书</button>
+      <button type="button" data-font-v="kai" aria-pressed="false">系统楷体</button>
+    </div>
+  </div>
+  <div class="drawer-section">
+    <p class="drawer-label">自动保存草稿</p>
+    <div class="seg seg-compact" id="autosaveSeg" role="group" aria-label="自动保存频率">
+      <button type="button" data-auto-v="off" aria-pressed="false">关闭</button>
+      <button type="button" data-auto-v="5" aria-pressed="true">5 秒</button>
+      <button type="button" data-auto-v="30" aria-pressed="false">30 秒</button>
+    </div>
+  </div>
+  <div class="drawer-section">
+    <div class="drawer-row">
+      <span class="drawer-label" style="margin:0">书写音效（墨笔沙沙声）</span>
+      <button class="switch" id="btnSound" role="switch" aria-checked="false" aria-label="书写音效开关"></button>
+    </div>
+  </div>
+  <div class="drawer-section">
+    <p class="drawer-label">数据管理</p>
+    <div class="drawer-btns">
+      <button class="btn btn-sm" id="btnExport" type="button">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+        导出备份
+      </button>
+      <button class="btn btn-sm" id="btnImport" type="button">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M4 20h16"/></svg>
+        导入恢复
+      </button>
+      <button class="btn btn-sm btn-danger" id="btnClearData" type="button">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        一键清空
+      </button>
+    </div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+  </div>
+</aside>
+
+<!-- ================= 确认弹层 ================= -->
+<div class="modal-layer" id="confirmLayer" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="modal-card confirm">
+    <h3 class="modal-title" id="confirmTitle">确认操作</h3>
+    <p class="modal-body dim" id="confirmBody"></p>
+    <div class="modal-actions">
+      <button class="btn" id="btnConfirmCancel" type="button">取消</button>
+      <button class="btn btn-primary" id="btnConfirmOk" type="button">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 记录查看弹层 ================= -->
+<div class="modal-layer" id="recordLayer" role="dialog" aria-modal="true" aria-labelledby="recordViewTitle">
+  <div class="modal-card">
+    <h3 class="modal-title" id="recordViewTitle">作品</h3>
+    <img class="record-view-img" id="recordImg" alt="练习作品">
+    <div class="record-view-meta">
+      <span class="meta-char" id="recordChar">永</span>
+      <span class="meta-pinyin" id="recordTime"></span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="btnRecordDelete" type="button">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        删除这条记录
+      </button>
+      <button class="btn" id="btnRecordClose" type="button">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-host" id="toastHost" aria-live="polite"></div>
+<noscript><div style="padding:24px;text-align:center">墨练需要启用 JavaScript 才能练习。</div></noscript>
+<script>
+(function(){
+'use strict';
+/* ============================================================
+   墨练 · 应用脚本
+   模块顺序：工具 → 字库 → 设置 → 路由 → 首页 → 练习(钢笔引擎)
+            → 笔顺(hanzi-writer) → 记录 → 设置抽屉 → 启动
+   ============================================================ */
+/* ---------- 工具 ---------- */
+function $(id){ return document.getElementById(id); }
+function $all(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+function el(tag, cls, text){
+  var n = document.createElement(tag);
+  if(cls) n.className = cls;
+  if(text != null) n.textContent = text;
+  return n;
+}
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function pad2(n){ return (n<10?'0':'')+n; }
+function fmtDate(ts){ var d=new Date(ts); return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function fmtTime(ts){ var d=new Date(ts); return pad2(d.getHours())+':'+pad2(d.getMinutes()); }
+function fmtStamp(ts){ var d=new Date(ts); return ''+d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+pad2(d.getHours())+pad2(d.getMinutes())+pad2(d.getSeconds()); }
+function fmtFull(ts){ var d=new Date(ts); return d.getFullYear()+' 年 '+(d.getMonth()+1)+' 月 '+d.getDate()+' 日 '+fmtTime(ts); }
+/* ---------- 本地存储（key 统一前缀 molian_，全程 try/catch） ---------- */
+var store = {
+  get: function(k, d){
+    try{
+      var v = localStorage.getItem('molian_'+k);
+      if(v == null) return d;
+      var p = JSON.parse(v);
+      return (p == null) ? d : p;
+    }catch(e){ return d; }
+  },
+  set: function(k, v){
+    try{ localStorage.setItem('molian_'+k, JSON.stringify(v)); return true; }
+    catch(e){ toast('本地存储失败：空间可能已满'); return false; }
+  },
+  del: function(k){ try{ localStorage.removeItem('molian_'+k); }catch(e){} }
+};
+/* ---------- Toast（禁止 alert/confirm） ---------- */
+var toastTimers = [];
+function toast(msg, ms){
+  try{
+    var host = $('toastHost');
+    var t = el('div','toast');
+    t.textContent = msg;
+    host.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add('show'); });
+    var timer = setTimeout(function(){
+      t.classList.remove('show');
+      setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 350);
+    }, ms || 2600);
+    toastTimers.push(timer);
+    if(toastTimers.length > 6){ clearTimeout(toastTimers.shift()); }
+  }catch(e){}
+}
+/* ---------- 自定义确认弹层 ---------- */
+var confirmResolve = null;
+function confirmDialog(opts){
+  return new Promise(function(resolve){
+    confirmResolve = resolve;
+    $('confirmTitle').textContent = opts.title || '确认操作';
+    $('confirmBody').textContent = opts.body || '';
+    $('btnConfirmOk').textContent = opts.confirmText || '确定';
+    $('btnConfirmOk').className = 'btn ' + (opts.danger ? 'btn-danger' : 'btn-primary');
+    $('confirmLayer').classList.add('show');
+    try{ $('btnConfirmOk').focus(); }catch(e){}
+  });
+}
+function closeConfirm(val){
+  $('confirmLayer').classList.remove('show');
+  var r = confirmResolve; confirmResolve = null;
+  if(r) r(!!val);
+}
+$('btnConfirmOk').addEventListener('click', function(){ closeConfirm(true); });
+$('btnConfirmCancel').addEventListener('click', function(){ closeConfirm(false); });
+$('confirmLayer').addEventListener('click', function(e){ if(e.target === this) closeConfirm(false); });
+/* ---------- 书写音效（默认关，WebAudio 沙沙声） ---------- */
+var sfx = {
+  ctx:null, gain:null, on:false,
+  ensure: function(){
+    if(this.ctx) return true;
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return false;
+      this.ctx = new AC();
+      var len = Math.floor(this.ctx.sampleRate * 2);
+      var buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      var d = buf.getChannelData(0);
+      var last = 0;
+      for(var i=0;i<len;i++){
+        var w = Math.random()*2-1;
+        last = (last + 0.02*w) / 1.02;
+        d[i] = last * 3.2;
+      }
+      var src = this.ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      var lp = this.ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 850;
+      this.gain = this.ctx.createGain();
+      this.gain.gain.value = 0;
+      src.connect(lp); lp.connect(this.gain); this.gain.connect(this.ctx.destination);
+      src.start();
+      return true;
+    }catch(e){ return false; }
+  },
+  setOn: function(v){
+    this.on = !!v;
+    if(this.on){
+      if(!this.ensure()){ toast('当前环境不支持书写音效'); return; }
+      if(this.ctx.state === 'suspended'){ try{ this.ctx.resume(); }catch(e){} }
+    }else if(this.gain){
+      try{ this.gain.gain.setTargetAtTime(0, this.ctx.currentTime, .05); }catch(e){}
+    }
+  },
+  start: function(){
+    if(!this.on || !this.ctx || !this.gain) return;
+    try{ this.gain.gain.setTargetAtTime(0.045, this.ctx.currentTime, .04); }catch(e){}
+  },
+  stop: function(){
+    if(!this.on || !this.ctx || !this.gain) return;
+    try{ this.gain.gain.setTargetAtTime(0, this.ctx.currentTime, .08); }catch(e){}
+  }
+};
+/* ============================================================
+   内置字库：字 | 拼音 | 部首 | 年级(1=一年级 2=二年级 0=通用)
+   ============================================================ */
+var RAW_LIB = [
+'一|yi|一|1','二|er|二|1','三|san|一|1','四|si|囗|1','五|wu|二|1',
+'六|liu|亠|1','七|qi|一|1','八|ba|八|1','九|jiu|丿|1','十|shi|十|1',
+'百|bai|一|2','千|qian|丿|2','万|wan|一|2','零|ling|雨|2','第|di|竹|0','个|ge|丨|0',
+'日|ri|日|1','月|yue|月|1','水|shui|水|1','火|huo|火|1','山|shan|山|1',
+'石|shi|石|1','田|tian|田|1','土|tu|土|1','木|mu|木|1','金|jin|金|0',
+'天|tian|一|1','地|di|土|1','春|chun|日|1','夏|xia|夂|1','秋|qiu|禾|1',
+'冬|dong|夂|1','风|feng|风|0','雨|yu|雨|1','雪|xue|雨|1','云|yun|二|1',
+'电|dian|田|0','雷|lei|雨|0','星|xing|日|0','光|guang|儿|1','永|yong|水|0',
+'气|qi|气|0','冰|bing|冫|0','河|he|氵|1','江|jiang|氵|1','湖|hu|氵|0',
+'海|hai|氵|1','洋|yang|氵|0','沙|sha|氵|1','泉|quan|水|0',
+'马|ma|马|1','牛|niu|牛|1','羊|yang|羊|1','鱼|yu|鱼|1','鸟|niao|鸟|1',
+'虫|chong|虫|1','象|xiang|豕|0','兔|tu|儿|0','龙|long|龙|0','蛇|she|虫|0',
+'虎|hu|虍|0','鹿|lu|鹿|0','猴|hou|犭|0','鸡|ji|鸟|1','鸭|ya|鸟|1',
+'鹅|e|鸟|0','猫|mao|犭|0','狗|gou|犭|0','鼠|shu|鼠|0','蚁|yi|虫|0',
+'花|hua|艹|1','草|cao|艹|1','树|shu|木|1','林|lin|木|1','森|sen|木|0',
+'果|guo|木|1','叶|ye|口|1','根|gen|木|0','苗|miao|艹|1','种|zhong|禾|1',
+'禾|he|禾|1','米|mi|米|1','麦|mai|麦|0','豆|dou|豆|0','瓜|gua|瓜|0',
+'桃|tao|木|1','梨|li|木|0','竹|zhu|竹|1','茶|cha|艹|0','药|cao|艹|0',
+'莲|lian|艹|0','梅|mei|木|0','松|song|木|0','柏|bai|木|0','菜|cai|艹|1',
+'人|ren|人|1','口|kou|口|1','手|shou|手|1','足|zu|足|1','目|mu|目|1',
+'耳|er|耳|1','舌|she|舌|0','牙|ya|牙|0','头|tou|大|1','脸|lian|月|0',
+'眼|yan|目|1','鼻|bi|自|0','嘴|zui|口|0','发|fa|又|0','心|xin|心|1',
+'身|shen|身|1','体|ti|亻|0','男|nan|田|1','女|nv|女|1','子|zi|子|1',
+'老|lao|耂|1','幼|you|幺|0','父|fu|父|0','母|mu|母|0','儿|er|儿|1',
+'孙|sun|子|0','爷|ye|父|0','奶|nai|女|0','哥|ge|一|0','弟|di|弓|0',
+'姐|jie|女|0','妹|mei|女|0','叔|shu|又|0','姨|yi|女|0','朋|peng|月|1',
+'友|you|又|1','我|wo|丿|1','你|ni|亻|1','他|ta|亻|1','她|ta|女|1',
+'们|men|亻|1','乡|xiang|乙|0','师|shi|巾|1','生|sheng|生|1',
+'看|kan|目|1','听|ting|口|1','说|shuo|言|1','话|hua|言|1','读|du|言|1',
+'写|xie|冖|1','学|xue|子|1','校|xiao|木|1','书|shu|乙|1','字|zi|子|1',
+'纸|zhi|纟|0','笔|bi|竹|1','墨|mo|土|0','砚|yan|石|0','琴|qin|王|0',
+'棋|qi|木|0','画|hua|田|1','歌|ge|欠|0','舞|wu|舛|0','唱|chang|口|0',
+'跳|tiao|足|0','跑|pao|足|0','走|zou|走|1','坐|zuo|土|0','立|li|立|1',
+'飞|fei|飞|1','来|lai|一|1','去|qu|厶|1','出|chu|凵|1','入|ru|入|1',
+'行|xing|行|1','住|zhu|亻|0','站|zhan|立|0','爬|pa|爪|0','游|you|氵|0',
+'戏|xi|戈|0','玩|wan|王|0','乐|le|丿|0','笑|xiao|竹|0','哭|ku|口|0',
+'吃|chi|口|1','喝|he|口|0','睡|shui|目|0','醒|xing|酉|0','买|mai|乙|0',
+'卖|mai|十|0','给|gei|纟|0','送|song|辶|0','借|jie|亻|0','还|huan|辶|0',
+'打|da|扌|1','拍|pai|扌|0','抓|zhua|扌|0','拿|na|人|0','放|fang|攵|0',
+'挂|gua|扌|0','按|an|扌|0','推|tui|扌|0','拉|la|扌|0','抱|bao|扌|0',
+'找|zhao|扌|0','举|ju|丶|0','洗|xi|氵|0','穿|chuan|穴|0','脱|tuo|月|0',
+'扫|sao|扌|0','抬|tai|扌|0','擦|ca|扌|0','捡|jian|扌|0','拾|shi|扌|0',
+'大|da|大|1','小|xiao|小|1','多|duo|夕|1','少|shao|小|1','高|gao|高|0',
+'低|di|亻|0','长|chang|长|0','短|duan|矢|0','胖|pang|月|0','瘦|shou|疒|0',
+'快|kuai|忄|0','慢|man|忄|0','新|xin|斤|0','旧|jiu|丨|0','好|hao|女|1',
+'坏|huai|土|0','美|mei|羊|0','白|bai|白|1','黑|hei|黑|1','红|hong|纟|1',
+'黄|huang|黄|0','蓝|lan|艹|0','绿|lv|纟|0','紫|zi|糸|0','明|ming|日|1',
+'暗|an|日|0','早|zao|日|1','晚|wan|日|1','上|shang|一|1','下|xia|一|1',
+'左|zuo|工|0','右|you|口|0','前|qian|刀|1','后|hou|口|1','中|zhong|丨|1',
+'间|jian|门|0','东|dong|一|1','南|nan|十|1','西|xi|西|1','北|bei|匕|1',
+'远|yuan|辶|0','近|jin|辶|0','里|li|里|1','外|wai|夕|1','在|zai|土|1',
+'有|you|月|1','无|wu|一|0','不|bu|一|1','很|hen|彳|0','太|tai|大|0',
+'圆|yuan|囗|1','方|fang|方|1','角|jiao|角|0'
+].join('\n') + '\n' + [
+'年|nian|干|1','岁|sui|山|0','时|shi|日|0','今|jin|人|1','昨|zuo|日|0',
+'周|zhou|口|0','期|qi|月|0','妈|ma|女|1','爸|ba|父|1','家|jia|宀|1',
+'门|men|门|1','窗|chuang|穴|0','房|fang|户|0','路|lu|足|1','桥|qiao|木|0',
+'车|che|车|1','船|chuan|舟|0','机|ji|木|0','包|bao|包|0','饭|fan|饣|0',
+'蛋|dan|虫|1','糖|tang|米|0','盐|yan|皿|0','油|you|氵|0','衣|yi|衣|0',
+'服|fu|月|0','鞋|xie|革|0','帽|mao|巾|0','伞|san|人|0','床|chuang|广|0',
+'桌|zhuo|木|0','椅|yi|木|0','灯|deng|火|0','钟|zhong|钅|0','线|xian|纟|0',
+'布|bu|巾|0','刀|dao|刀|1','剪|jian|刀|0','尺|chi|尸|1','爱|ai|爫|1',
+'泪|lei|氵|0','汗|han|氵|0','梦|meng|木|0','想|xiang|心|1','知|zhi|矢|1',
+'识|shi|讠|1','信|xin|亻|0','同|tong|口|1','习|xi|乙|1','问|wen|门|1',
+'答|da|竹|1','题|ti|页|0','名|ming|口|0','句|ju|口|0','事|shi|一|0',
+'情|qing|忄|0','理|li|王|0',
+'的|de|白|0','了|le|乙|0','是|shi|日|0','和|he|口|0','把|ba|扌|0',
+'被|bei|衤|0','从|cong|人|0','向|xiang|口|0','为|wei|丶|0','以|yi|人|0',
+'于|yu|二|0','之|zhi|丶|0','其|qi|八|0','此|ci|止|0','或|huo|戈|0',
+'皆|jie|白|0','亦|yi|亠|0','更|geng|曰|0','最|zui|日|0','请|qing|讠|0',
+'谢|xie|讠|0','再|zai|一|0','又|you|又|0','也|ye|乙|0','都|dou|阝|0',
+'就|jiu|尢|0','才|cai|扌|0','只|zhi|口|0','条|tiao|木|0','些|xie|止|0',
+'吗|ma|口|0','呢|ne|口|0','吧|ba|口|0','啊|a|口|0','欢|huan|欠|1',
+'喜|xi|口|0','香|xiang|香|0','甜|tian|甘|1','圆|yuan|囗|1'
+].join('\n');
+/* ---------- 字库解析（去重） ---------- */
+var CHARLIB = (function(){
+  var seen = {}, out = [];
+  var lines = RAW_LIB.split('\n');
+  for(var i=0;i<lines.length;i++){
+    var line = lines[i].trim();
+    if(!line) continue;
+    var parts = line.split('|');
+    var c = parts[0];
+    if(!c || seen[c]) continue;
+    seen[c] = 1;
+    out.push({ c:c, p:parts[1]||'', r:parts[2]||'', g:parseInt(parts[3],10)||0 });
+  }
+  return out;
+})();
+var LIB_MAP = {};
+CHARLIB.forEach(function(it){ LIB_MAP[it.c] = it; });
+var CURATED = CHARLIB.slice();
+/* ============================================================
+   在线完整字库：运行时从 jsDelivr 拉取 hanzi-writer-data 的全量
+   字符清单 + pinyin 字典，合并后缓存 localStorage，之后离线可用。
+   内置常用字始终兜底，网络失败不影响使用。
+   ============================================================ */
+var FULL_LIB = { version:'hw-2.0.1', state:'idle' }; /* idle|loading|ready|failed */
+var PINYIN = {};
+var FULL_LIST_URL = 'https://data.jsdelivr.com/v1/package/npm/hanzi-writer-data@2.0.1';
+var PINYIN_URL = 'https://cdn.jsdelivr.net/npm/pinyin@2.11.2/data/dict-zi.js';
+function stripTone(s){
+  try{ return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+  catch(e){ return String(s).toLowerCase(); }
+}
+function extractChars(node, out){
+  var files = (node && node.files) || [];
+  for(var i = 0; i < files.length; i++){
+    var f = files[i];
+    if(f.type === 'directory'){ extractChars(f, out); continue; }
+    var name = f.name || '';
+    if(name.slice(-5) !== '.json') continue;
+    var c = name.slice(0, -5);
+    var cp = c.codePointAt(0);
+    if((c.length === 1 || (c.length === 2 && cp > 0xFFFF)) && cp >= 0x2E80) out.push(c);
+  }
+}
+function fetchPinyinDict(){
+  return fetch(PINYIN_URL).then(function(r){
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  }).then(function(text){
+    var re = /dict\[(0x[0-9a-fA-F]+)\]\s*=\s*"([^"]*)"/g;
+    var m, n = 0;
+    while((m = re.exec(text)) !== null){
+      var ch = '';
+      try{ ch = String.fromCodePoint(parseInt(m[1], 16)); }catch(e){ continue; }
+      var pys = m[2].split(',').map(stripTone).filter(function(s){ return !!s; });
+      if(pys.length){ PINYIN[ch] = pys.join(','); n++; }
+    }
+    return n;
+  }).catch(function(){ return 0; });
+}
+function rebuildLibIndex(){
+  LIB_MAP = {};
+  CHARLIB.forEach(function(it){ LIB_MAP[it.c] = it; });
+}
+function applyFullLibrary(chars){
+  var have = {}, merged = CURATED.slice();
+  merged.forEach(function(it){ have[it.c] = 1; });
+  for(var i = 0; i < chars.length; i++){
+    var c = chars[i];
+    if(have[c]) continue;
+    have[c] = 1;
+    merged.push({ c:c, p:PINYIN[c] || '', r:'', g:0 });
+  }
+  CHARLIB = merged;
+  rebuildLibIndex();
+  FULL_LIB.state = 'ready';
+  try{
+    var payload = merged.map(function(it){ return [it.c, it.p, it.r, it.g]; });
+    localStorage.setItem('molian_charlib', JSON.stringify({ v:FULL_LIB.version, list:payload }));
+  }catch(e){}
+}
+function loadFullLibrary(silent){
+  if(FULL_LIB.state === 'loading' || FULL_LIB.state === 'ready') return Promise.resolve();
+  var cached = store.get('charlib', null);
+  if(cached && cached.v === FULL_LIB.version && Array.isArray(cached.list) && cached.list.length){
+    CHARLIB = cached.list.map(function(row){
+      return { c:row[0], p:row[1] || '', r:row[2] || '', g:row[3] || 0 };
+    });
+    rebuildLibIndex();
+    FULL_LIB.state = 'ready';
+    if(state.view === 'home') renderHome();
+    if(!silent) toast('已载入完整字库 ' + CHARLIB.length + ' 字');
+    return Promise.resolve();
+  }
+  FULL_LIB.state = 'loading';
+  if(!silent) toast('正在加载完整字库（9000+ 字，首次需几秒）…', 5000);
+  return Promise.all([
+    fetch(FULL_LIST_URL).then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }),
+    fetchPinyinDict()
+  ]).then(function(res){
+    var listing = res[0];
+    var chars = [];
+    extractChars(listing, chars);
+    if(!chars.length) throw new Error('empty listing');
+    applyFullLibrary(chars);
+    if(state.view === 'home') renderHome();
+    if(!silent) toast('完整字库已就绪：' + CHARLIB.length + ' 字全部可检索');
+  }).catch(function(){
+    FULL_LIB.state = 'failed';
+    if(!silent) toast('完整字库加载失败，当前使用内置常用 ' + CURATED.length + ' 字');
+  });
+}
+/* ---------- 今日荐字 ---------- */
+var FEATURED = [
+  {c:'永', m:'永字八法，一笔一画见功夫。'},
+  {c:'春', m:'万物生发，一年之计始于此。'},
+  {c:'山', m:'仁者乐山，稳如磐石。'},
+  {c:'水', m:'水利万物，而不争。'},
+  {c:'云', m:'行云流水，笔意自在。'},
+  {c:'竹', m:'未出土时，先有其节。'},
+  {c:'松', m:'经霜不凋，风骨自成。'},
+  {c:'梅', m:'疏影横斜，暗香浮动。'},
+  {c:'茶', m:'禅茶一味，静气凝神。'},
+  {c:'琴', m:'焚香抚琴，余韵悠长。'},
+  {c:'书', m:'书为心画，字如其人。'},
+  {c:'墨', m:'一点如漆，万古不磨。'},
+  {c:'心', m:'写字先正心，心正笔正。'},
+  {c:'明', m:'心里明亮，字自清明。'},
+  {c:'风', m:'风行水上，自然成文。'},
+  {c:'秋', m:'金风送爽，字如其人。'},
+  {c:'夏', m:'万物盛大，生长至极。'},
+  {c:'冬', m:'万物收藏，静以待发。'}
+];
+function todayFeature(){
+  var now = new Date();
+  var start = new Date(now.getFullYear(), 0, 0);
+  var day = Math.floor((now - start) / 86400000);
+  var f = FEATURED[day % FEATURED.length];
+  var info = LIB_MAP[f.c] || {p:'yong'};
+  return { c:f.c, p:info.p, m:f.m };
+}
+/* ---------- 设置 ---------- */
+var settings = Object.assign({
+  theme:'light', font:'ma', grid:'tian', pen:'mid', model:true,
+  autosave:'5', sound:false
+}, store.get('settings', {}));
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', settings.theme);
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', settings.theme === 'dark' ? '#1C1A17' : '#F5EFE0');
+}
+function applyFont(){
+  var v = settings.font === 'xing' ? 'var(--font-xing)'
+        : settings.font === 'kai' ? 'var(--font-kai)'
+        : 'var(--font-title)';
+  var mc = $('modelChar');
+  if(mc) mc.style.setProperty('--model-font', v);
+  var tc = $('todayChar');
+  if(tc) tc.style.fontFamily = v;
+}
+function saveSettings(){ store.set('settings', settings); }
+/* 墨色/纸色（供 canvas 与 hanzi-writer 使用） */
+function inkHex(){ return settings.theme === 'dark' ? '#EDE6D8' : '#221E1A'; }
+function paperHex(){ return settings.theme === 'dark' ? '#1C1A17' : '#F5EFE0'; }
+function inkRGBA(a){ return settings.theme === 'dark' ? 'rgba(237,230,216,'+a+')' : 'rgba(34,30,26,'+a+')'; }
+/* ============================================================
+   全局状态与路由
+   ============================================================ */
+var state = {
+  view:'home',
+  char:null,
+  mode:'free',            /* free | demo | quiz */
+  strokes:[],             /* 已完成的笔画（归一化坐标） */
+  history:[],             /* 撤销快照 */
+  drawing:null,           /* 当前正在绘制的笔画 */
+  writer:null,            /* hanzi-writer 实例 */
+  totalStrokes:0,
+  playing:false,
+  tab:'common',
+  grade:'all',
+  radical:'all',
+  query:'',
+  shown:120,
+  sig:'',
+  viewingRecord:null
+};
+function favorites(){
+  var f = store.get('favorites', []);
+  return Array.isArray(f) ? f : [];
+}
+function isFav(c){ return favorites().indexOf(c) >= 0; }
+function toggleFav(c){
+  var f = favorites();
+  var i = f.indexOf(c);
+  if(i >= 0){ f.splice(i,1); toast('已取消收藏「'+c+'」'); }
+  else{ f.unshift(c); toast('已收藏「'+c+'」'); }
+  store.set('favorites', f);
+  syncFavButtons();
+}
+function syncFavButtons(){
+  var on = state.char && isFav(state.char);
+  var mf = $('metaFav');
+  if(mf){
+    mf.setAttribute('aria-pressed', on ? 'true':'false');
+    mf.classList.toggle('on', !!on);
+  }
+  if(state.view === 'home') renderGrid();
+  if(state.view === 'records') renderStats();
+}
+function route(view){
+  state.view = view;
+  $all('.view').forEach(function(v){ v.classList.remove('active'); });
+  var map = {home:'view-home', practice:'view-practice', records:'view-records'};
+  var node = $(map[view] || 'view-home');
+  node.classList.add('active');
+  $all('.nav-link').forEach(function(n){
+    n.classList.toggle('active', n.getAttribute('data-view') === view);
+  });
+  if(view === 'home') renderHome();
+  if(view === 'practice') enterPractice(true);
+  if(view === 'records') renderRecords();
+  try{ window.scrollTo(0, 0); }catch(e){}
+  try{ history.replaceState(null, '', '#' + view); }catch(e){}
+}
+/* ============================================================
+   首页渲染（P3）
+   ============================================================ */
+function renderHome(){
+  var f = todayFeature();
+  $('todayChar').textContent = f.c;
+  $('todayCharBig').textContent = f.c;
+  $('todayPinyin').textContent = f.p;
+  $('todayMeaning').textContent = f.m;
+  var libText;
+  if(FULL_LIB.state === 'ready'){
+    libText = '完整字库 ' + CHARLIB.length + ' 字 · 支持汉字与拼音检索';
+  }else if(FULL_LIB.state === 'loading'){
+    libText = '完整字库加载中（9000+ 字）· 当前可用内置常用 ' + CURATED.length + ' 字';
+  }else if(FULL_LIB.state === 'failed'){
+    libText = '内置常用 ' + CURATED.length + ' 字 · 完整字库加载失败，可刷新重试';
+  }else{
+    libText = '内置常用 ' + CURATED.length + ' 字 · 支持汉字与拼音检索';
+  }
+  $('libCount').textContent = libText;
+  renderGrid();
+}
+function matchQuery(it, q){
+  if(!q) return true;
+  if(it.c.indexOf(q) >= 0) return true;
+  if(!it.p) return false;
+  var pys = it.p.split(',');
+  for(var i = 0; i < pys.length; i++){
+    if(pys[i].indexOf(q) === 0) return true;
+  }
+  return false;
+}
+function filterChars(){
+  var q = state.query.trim().toLowerCase();
+  var list;
+  if(state.tab === 'school'){
+    list = state.grade === 'all'
+      ? CURATED.filter(function(it){ return it.g > 0; })
+      : CURATED.filter(function(it){ return it.g === parseInt(state.grade, 10); });
+  }else if(state.tab === 'radical'){
+    list = state.radical === 'all' ? [] : CHARLIB.filter(function(it){ return it.r === state.radical; });
+  }else if(state.tab === 'fav'){
+    var f = favorites();
+    list = CHARLIB.filter(function(it){ return f.indexOf(it.c) >= 0; });
+    list.sort(function(a, b){ return f.indexOf(a.c) - f.indexOf(b.c); });
+  }else if(state.tab === 'all'){
+    list = CHARLIB;
+  }else{
+    list = CURATED;
+  }
+  if(state.tab === 'radical' && !q && state.radical === 'all') return [];
+  if(q){
+    list = list.filter(function(it){ return matchQuery(it, q); });
+    return list.slice(0, 50); /* 搜索结果只呈现前 50 条 */
+  }
+  return list;
+}
+var PAGE_SIZE = 120;
+function renderGrid(){
+  var grid = $('charGrid');
+  var empty = $('homeEmpty');
+  var chips = $('chipRow');
+  var moreWrap = $('loadMoreWrap');
+  grid.innerHTML = '';
+  /* 分类/搜索变化时重置分页 */
+  var sig = [state.tab, state.grade, state.radical, state.query].join('|');
+  if(sig !== state.sig){ state.sig = sig; state.shown = PAGE_SIZE; }
+  /*「全部汉字」页签仅在完整字库就绪后可用 */
+  var allTab = document.querySelector('#tabBar .tab[data-tab="all"]');
+  if(allTab){
+    allTab.hidden = FULL_LIB.state !== 'ready';
+    if(state.tab === 'all' && FULL_LIB.state !== 'ready') state.tab = 'common';
+  }
+  /*  chips */
+  chips.innerHTML = '';
+  chips.hidden = true;
+  if(state.tab === 'school'){
+    chips.hidden = false;
+    [['all','全部同步'],['1','一年级'],['2','二年级']].forEach(function(g){
+      var b = el('button','chip', g[1]);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(state.grade === g[0]));
+      b.addEventListener('click', function(){ state.grade = g[0]; renderGrid(); });
+      chips.appendChild(b);
+    });
+  }else if(state.tab === 'radical'){
+    chips.hidden = false;
+    var rads = [];
+    CHARLIB.forEach(function(it){ if(it.r && rads.indexOf(it.r) < 0) rads.push(it.r); });
+    var mkRad = function(val, label){
+      var b = el('button','chip', label);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(state.radical === val));
+      b.addEventListener('click', function(){ state.radical = val; renderGrid(); });
+      chips.appendChild(b);
+    };
+    mkRad('all', '全部部首');
+    rads.forEach(function(r){ mkRad(r, r); });
+  }
+  var list = filterChars();
+  var shownList = list.slice(0, state.shown);
+  if(!list.length){
+    empty.hidden = false;
+    moreWrap.hidden = true;
+    var msg = '没有找到匹配的字';
+    if(state.tab === 'fav') msg = '还没有收藏的字，点字卡右上角的星标即可收藏';
+    else if(state.tab === 'radical' && state.radical === 'all' && !state.query) msg = '选择一个部首开始检索';
+    else if(state.tab === 'all' && FULL_LIB.state === 'loading') msg = '完整字库加载中，请稍候…';
+    else if(state.tab === 'all' && FULL_LIB.state === 'failed') msg = '完整字库加载失败，可先练习常用字';
+    $('homeEmptyText').textContent = msg;
+    return;
+  }
+  empty.hidden = true;
+  var frag = document.createDocumentFragment();
+  shownList.forEach(function(it){
+    var card = el('button','char-card');
+    card.type = 'button';
+    card.setAttribute('aria-label', '练习「' + it.c + '」' + (it.p ? '，拼音 ' + it.p.split(',')[0] : ''));
+    card.textContent = it.c;
+    card.addEventListener('click', function(){ openPractice(it.c); });
+    var fav = el('button','fav-btn' + (isFav(it.c) ? ' on' : ''));
+    fav.type = 'button';
+    fav.setAttribute('aria-label', (isFav(it.c) ? '取消收藏 ' : '收藏 ') + it.c);
+    fav.setAttribute('aria-pressed', isFav(it.c) ? 'true' : 'false');
+    fav.innerHTML = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></svg>';
+    fav.addEventListener('click', function(e){ e.stopPropagation(); toggleFav(it.c); });
+    card.appendChild(fav);
+    frag.appendChild(card);
+  });
+  grid.appendChild(frag);
+  if(list.length > state.shown){
+    moreWrap.hidden = false;
+    $('btnLoadMore').textContent = '显示更多（剩余 ' + (list.length - state.shown) + ' 字）';
+  }else{
+    moreWrap.hidden = true;
+  }
+}
+/* ============================================================
+   练习页 · 田字格与钢笔引擎（P1）
+   ============================================================ */
+var REF = 480; /* 参考分辨率：笔画宽度以此为基准存储 */
+var R = { size: 480, dpr: 1 };
+var LEVELS = { fine:{min:2, max:8}, mid:{min:3, max:14}, bold:{min:5, max:20} };
+function stageSize(){ return Math.round($('stage').clientWidth) || 320; }
+function syncCanvases(){
+  var size = stageSize();
+  var dpr = window.devicePixelRatio || 1;
+  R.size = size; R.dpr = dpr;
+  [$('gridCanvas'), $('inkCanvas')].forEach(function(c){
+    c.width = Math.round(size * dpr);
+    c.height = Math.round(size * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  });
+}
+function renderGridCanvas(){
+  var ctx = $('gridCanvas').getContext('2d');
+  var S = R.size;
+  ctx.clearRect(0, 0, S, S);
+  ctx.strokeStyle = inkRGBA(.32);
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(.75, .75, S - 1.5, S - 1.5);
+  if(settings.grid !== 'none'){
+    ctx.save();
+    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = inkRGBA(.16);
+    ctx.beginPath();
+    ctx.moveTo(S/2, 0); ctx.lineTo(S/2, S);
+    ctx.moveTo(0, S/2); ctx.lineTo(S, S/2);
+    if(settings.grid === 'mi'){
+      ctx.moveTo(0, 0); ctx.lineTo(S, S);
+      ctx.moveTo(S, 0); ctx.lineTo(0, S);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+/* 二次贝塞尔平滑 + 速度映射线宽，逐段绘制 */
+function drawStrokeSegments(ctx, pts, fromIdx, S){
+  var n = pts.length;
+  if(n < 2) return;
+  var start = Math.max(1, fromIdx | 0);
+  ctx.strokeStyle = inkHex();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.shadowColor = inkRGBA(.4);
+  ctx.shadowBlur = Math.max(1, S / REF * 1.4);
+  for(var i = start; i <= n - 2; i++){
+    var p0 = pts[i-1], p1 = pts[i], p2 = pts[i+1];
+    ctx.beginPath();
+    ctx.lineWidth = Math.max(.8, ((p0.w + p1.w + p2.w) / 3) * (S / REF));
+    ctx.moveTo((p0.x + p1.x)/2 * S, (p0.y + p1.y)/2 * S);
+    ctx.quadraticCurveTo(p1.x * S, p1.y * S, (p1.x + p2.x)/2 * S, (p1.y + p2.y)/2 * S);
+    ctx.stroke();
+  }
+  ctx.shadowBlur = 0;
+}
+function renderInkAll(){
+  var ctx = $('inkCanvas').getContext('2d');
+  ctx.clearRect(0, 0, R.size, R.size);
+  state.strokes.forEach(function(st){ st._d = 0; drawStrokeSegments(ctx, st.pts, 0, R.size); });
+}
+function renderCurrent(){
+  if(!state.drawing) return;
+  var ctx = $('inkCanvas').getContext('2d');
+  drawStrokeSegments(ctx, state.drawing.pts, state.drawing._d || 0, R.size);
+  state.drawing._d = Math.max(1, state.drawing.pts.length - 2);
+}
+function stagePoint(e){
+  var rect = $('stage').getBoundingClientRect();
+  return { x:(e.clientX - rect.left) / rect.width, y:(e.clientY - rect.top) / rect.height };
+}
+function onPenDown(e){
+  if(state.mode !== 'free' || !state.char) return;
+  e.preventDefault();
+  try{ $('inkCanvas').setPointerCapture(e.pointerId); }catch(err){}
+  pushHistory();
+  var p = stagePoint(e);
+  var lv = LEVELS[settings.pen] || LEVELS.mid;
+  state.drawing = { pts:[{x:p.x, y:p.y, w:lv.max}], _d:0, lvl:settings.pen, t:performance.now() };
+  sfx.start();
+}
+function onPenMove(e){
+  if(!state.drawing) return;
+  e.preventDefault();
+  var p = stagePoint(e);
+  var pts = state.drawing.pts;
+  var last = pts[pts.length - 1];
+  var rect = $('stage').getBoundingClientRect();
+  var dx = (p.x - last.x) * rect.width;
+  var dy = (p.y - last.y) * rect.height;
+  var dist = Math.sqrt(dx*dx + dy*dy);
+  if(dist < 1.2) return;
+  var now = performance.now();
+  var dt = Math.max(now - (state.drawing.t || now - 16), 1);
+  state.drawing.t = now;
+  var v = (dist / dt) * (REF / rect.width);
+  var lv = LEVELS[state.drawing.lvl];
+  var target = lv.max - (lv.max - lv.min) * clamp(v / 1.5, 0, 1);
+  var w = last.w + (target - last.w) * 0.35;
+  if(pts.length === 1) w = Math.max(w, lv.max * 0.92); /* 起笔重 */
+  pts.push({x:p.x, y:p.y, w:w});
+  renderCurrent();
+}
+function onPenUp(){
+  if(!state.drawing) return;
+  sfx.stop();
+  var st = state.drawing;
+  state.drawing = null;
+  /* 收笔轻：末尾三笔渐细 */
+  for(var j = 1; j <= 3 && st.pts.length - j >= 1; j++){
+    st.pts[st.pts.length - j].w *= (1 - 0.16 * j);
+  }
+  if(st.pts.length < 2){
+    st.pts.push({ x:st.pts[0].x + 0.0025, y:st.pts[0].y, w:st.pts[0].w * 0.9 });
+  }
+  state.strokes.push(st);
+  renderInkAll();
+  scheduleDraftSave();
+}
+function pushHistory(){
+  state.history.push(state.strokes.slice());
+  if(state.history.length > 80) state.history.shift();
+}
+function undo(){
+  if(state.mode !== 'free'){ toast('请先切换到自由书写'); return; }
+  if(!state.history.length){ toast('没有可撤销的操作'); return; }
+  state.strokes = state.history.pop();
+  renderInkAll();
+  scheduleDraftSave();
+}
+function clearStage(){
+  if(state.mode !== 'free') return;
+  if(!state.strokes.length){ toast('字格已经是空的'); return; }
+  pushHistory();
+  state.strokes = [];
+  renderInkAll();
+  scheduleDraftSave();
+  toast('已清空字格');
+}
+function exportDataURL(S, type, quality){
+  var c = document.createElement('canvas');
+  c.width = S; c.height = S;
+  var ctx = c.getContext('2d');
+  var k = S / REF;
+  ctx.fillStyle = paperHex();
+  ctx.fillRect(0, 0, S, S);
+  ctx.strokeStyle = inkRGBA(.32);
+  ctx.lineWidth = 1.5 * k;
+  ctx.strokeRect(.75 * k, .75 * k, S - 1.5 * k, S - 1.5 * k);
+  if(settings.grid !== 'none'){
+    ctx.save();
+    ctx.setLineDash([5 * k, 5 * k]);
+    ctx.lineWidth = Math.max(1, k);
+    ctx.strokeStyle = inkRGBA(.16);
+    ctx.beginPath();
+    ctx.moveTo(S/2, 0); ctx.lineTo(S/2, S);
+    ctx.moveTo(0, S/2); ctx.lineTo(S, S/2);
+    if(settings.grid === 'mi'){
+      ctx.moveTo(0, 0); ctx.lineTo(S, S);
+      ctx.moveTo(S, 0); ctx.lineTo(0, S);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+  state.strokes.forEach(function(st){ st._d = 0; drawStrokeSegments(ctx, st.pts, 0, S); });
+  return type === 'jpeg' ? c.toDataURL('image/jpeg', quality || .72) : c.toDataURL('image/png');
+}
+function downloadURI(uri, name){
+  var a = document.createElement('a');
+  a.href = uri;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+function savePractice(){
+  if(!state.char) return;
+  if(!state.strokes.length){ toast('字格还是空的，先写几笔再保存'); return; }
+  var recs = store.get('records', []);
+  if(recs.length >= 100){
+    confirmDialog({
+      title:'记录已满',
+      body:'本地记录已达 100 张上限。是否清理最早的 20 张后再保存？',
+      confirmText:'清理并保存'
+    }).then(function(ok){
+      if(!ok){ toast('已取消保存'); return; }
+      recs.splice(recs.length - 20, 20);
+      store.set('records', recs);
+      doSave();
+    });
+    return;
+  }
+  doSave();
+}
+function doSave(){
+  downloadURI(exportDataURL(1080, 'png'), '墨练-' + state.char + '-' + fmtStamp(Date.now()) + '.png');
+  var thumb = exportDataURL(240, 'jpeg', .72);
+  var rec = {
+    id:'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    char: state.char,
+    ts: Date.now(),
+    thumb: thumb
+  };
+  var recs = store.get('records', []);
+  recs.unshift(rec);
+  if(store.set('records', recs)){
+    toast('已保存 PNG，并记入练习记录');
+  }else{
+    toast('PNG 已下载，但记录写入失败（本地空间不足）');
+  }
+}
+/* ---------- 草稿自动保存 ---------- */
+var draftTimer = null;
+function scheduleDraftSave(){
+  if(settings.autosave === 'off') return;
+  var sec = parseInt(settings.autosave, 10) || 5;
+  if(draftTimer) clearTimeout(draftTimer);
+  draftTimer = setTimeout(function(){
+    draftTimer = null;
+    if(!state.char) return;
+    store.set('draft', { char: state.char, mode: state.mode, strokes: state.strokes.slice(-40), ts: Date.now() });
+  }, sec * 1000);
+}
+function restoreDraft(){
+  var d = store.get('draft', null);
+  if(d && d.char === state.char && Array.isArray(d.strokes) && d.strokes.length){
+    var restored = d.strokes.map(function(st){
+      return {
+        pts: (st.pts || []).map(function(p){ return { x:+p.x || 0, y:+p.y || 0, w:+p.w || 3 }; }),
+        _d:0
+      };
+    }).filter(function(st){ return st.pts.length; });
+    if(restored.length){
+      state.strokes = restored;
+      renderInkAll();
+      toast('已恢复上次的草稿（' + restored.length + ' 笔）');
+    }
+  }
+}
+/* ============================================================
+   笔顺演示与描红跟练（P2 · hanzi-writer）
+   ============================================================ */
+var dataCache = {};
+function loadCharData(ch, onComplete, onError){
+  if(dataCache[ch]){ try{ onComplete(dataCache[ch]); }catch(e){} return; }
+  var url = 'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + encodeURIComponent(ch) + '.json';
+  var done = false;
+  var timer = setTimeout(function(){
+    if(!done){ done = true; onError(new Error('timeout')); }
+  }, 6000);
+  fetch(url).then(function(r){
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(j){
+    if(done) return;
+    done = true;
+    clearTimeout(timer);
+    dataCache[ch] = j;
+    onComplete(j);
+  }).catch(function(e){
+    if(done) return;
+    done = true;
+    clearTimeout(timer);
+    onError(e);
+  });
+}
+function hideWriter(){
+  if(state.writer){ try{ state.writer.cancelQuiz(); }catch(e){} }
+  state.writer = null;
+  var host = $('writerHost');
+  if(host) host.innerHTML = '';
+}
+function ensureWriter(){
+  if(!state.char) return;
+  if(typeof HanziWriter === 'undefined'){
+    $('stageLoading').classList.remove('show');
+    $('stageFallback').classList.add('show');
+    toast('笔顺组件加载失败，请检查网络后刷新页面');
+    return;
+  }
+  $('stageFallback').classList.remove('show');
+  $('stageLoading').classList.add('show');
+  var opts = {
+    width: R.size,
+    height: R.size,
+    padding: 8,
+    showCharacter: false,
+    showOutline: true,
+    strokeAnimationSpeed: 1.2,
+    delayBetweenStrokes: 320,
+    strokeColor: inkHex(),
+    outlineColor: inkRGBA(.14),
+    drawingColor: inkHex(),
+    highlightColor: '#A63A2E',
+    charDataLoader: loadCharData,
+    onLoadCharDataSuccess: function(data){
+      if(state.mode === 'free' || !state.writer) return;
+      $('stageLoading').classList.remove('show');
+      state.totalStrokes = (data && data.strokes) ? data.strokes.length : 0;
+      if(state.totalStrokes <= 0){
+        $('stageFallback').classList.add('show');
+        return;
+      }
+      if(state.mode === 'quiz'){
+        startQuiz();
+      }else{
+        $('strokeCounter').textContent = '共 ' + state.totalStrokes + ' 笔 · 点击播放';
+      }
+    },
+    onLoadCharDataError: function(){
+      if(state.mode === 'free' || !state.writer) return;
+      $('stageLoading').classList.remove('show');
+      $('stageFallback').classList.add('show');
+      toast('该字暂无笔顺数据，可直接描红临写');
+    }
+  };
+  try{
+    state.writer = HanziWriter.create($('writerHost'), state.char, opts);
+  }catch(e){
+    state.writer = null;
+    $('stageLoading').classList.remove('show');
+    $('stageFallback').classList.add('show');
+  }
+}
+function setCounter(cur, total){
+  var c = $('strokeCounter');
+  if(!c) return;
+  c.textContent = total > 0 ? ('第 ' + cur + ' 笔 / 共 ' + total + ' 笔') : '';
+}
+function setPlayLabel(playing){
+  $('btnPlayText').textContent = playing ? '暂停' : '播放';
+}
+function playOrder(){
+  if(!state.writer || state.mode !== 'demo') return;
+  if(state.playing){ stopOrder(); return; }
+  state.playing = true;
+  setPlayLabel(true);
+  var i = 0;
+  var n = state.totalStrokes;
+  function step(){
+    if(!state.playing || state.mode !== 'demo'){ setPlayLabel(false); return; }
+    if(i >= n){
+      state.playing = false;
+      setPlayLabel(false);
+      setCounter(n, n);
+      return;
+    }
+    setCounter(i + 1, n);
+    var idx = i;
+    new Promise(function(res){
+      try{ state.writer.animateStroke(idx, { onComplete:function(){ res(); } }); }
+      catch(e){ res(); }
+    }).then(function(){
+      i++;
+      if(state.playing) setTimeout(step, 60);
+      else setPlayLabel(false);
+    });
+  }
+  try{ state.writer.hideCharacter(); }catch(e){}
+  setTimeout(step, 140);
+}
+function stopOrder(){
+  state.playing = false;
+  setPlayLabel(false);
+}
+function startQuiz(){
+  if(!state.writer) return;
+  setCounter(0, state.totalStrokes);
+  try{
+    state.writer.quiz({
+      showHintAfterMisses: 1,
+      highlightOnComplete: true,
+      leniency: 1,
+      onCorrectStroke: function(d){
+        var s = (d && typeof d.stroke === 'number') ? d.stroke : null;
+        if(s == null && d && typeof d.strokesRemaining === 'number'){
+          s = state.totalStrokes - d.strokesRemaining - 1;
+        }
+        setCounter((s != null ? s : 0) + 1, state.totalStrokes);
+      },
+      onMistake: function(){
+        var st = $('stage');
+        st.classList.remove('flash-miss');
+        requestAnimationFrame(function(){ st.classList.add('flash-miss'); });
+        setTimeout(function(){ st.classList.remove('flash-miss'); }, 600);
+        toast('这一笔不对，留意起笔位置，再试一次', 1600);
+      },
+      onComplete: function(){
+        setCounter(state.totalStrokes, state.totalStrokes);
+        toast('跟练完成，共 ' + state.totalStrokes + ' 笔，辛苦了');
+      }
+    });
+    toast('按提示的起笔位置，逐笔描红');
+  }catch(e){
+    toast('跟练模式启动失败，请重试');
+  }
+}
+/* ---------- 模式切换（书写层互斥） ---------- */
+function switchMode(mode){
+  if(state.mode === 'quiz' && state.writer){
+    try{ state.writer.cancelQuiz(); }catch(e){}
+  }
+  state.playing = false;
+  state.mode = mode;
+  hideWriter();
+  $('stageLoading').classList.remove('show');
+  $('stageFallback').classList.remove('show');
+  syncModeUI();
+  if(mode === 'free'){
+    renderGridCanvas();
+    renderInkAll();
+  }else if(state.char){
+    syncCanvases();
+    ensureWriter();
+  }
+  if(mode === 'free') setCounter(0, 0);
+}
+function syncModeUI(){
+  $all('#modeSeg button').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-mode') === state.mode));
+  });
+  var writer = state.mode !== 'free';
+  var stage = $('stage');
+  if(stage) stage.classList.toggle('writer-mode', writer);
+  $('strokeControls').hidden = !state.char || state.mode === 'free';
+  $('btnPlay').style.display = state.mode === 'demo' ? '' : 'none';
+  $('btnReplay').style.display = state.mode === 'demo' ? '' : 'none';
+  $('btnQuizRestart').style.display = state.mode === 'quiz' ? '' : 'none';
+  ['btnUndo','btnClear','btnSave'].forEach(function(id){
+    var b = $(id);
+    if(b) b.setAttribute('aria-disabled', writer ? 'true' : 'false');
+  });
+  ['penSeg','gridSeg','modelSeg'].forEach(function(id){
+    var s = $(id);
+    if(!s) return;
+    s.style.opacity = writer ? '.38' : '';
+    s.style.pointerEvents = writer ? 'none' : '';
+  });
+}
+function applyModelToggle(){
+  var mc = $('modelChar');
+  if(mc) mc.classList.toggle('is-hidden', !settings.model);
+  var b = $('btnModel');
+  if(b) b.setAttribute('aria-pressed', String(!!settings.model));
+}
+/* ---------- 进入/打开练习 ---------- */
+function openPractice(c){
+  state.char = c;
+  state.mode = 'free';
+  state.strokes = [];
+  state.history = [];
+  state.totalStrokes = 0;
+  state.playing = false;
+  hideWriter();
+  route('practice');
+}
+function enterPractice(){
+  var has = !!state.char;
+  /* 引导态：只隐藏功能图层，舞台本身保持可见以承载引导面板 */
+  $('modelChar').style.display = has ? '' : 'none';
+  $('gridCanvas').style.display = has ? '' : 'none';
+  $('inkCanvas').style.display = has ? '' : 'none';
+  $('writerHost').style.display = has ? '' : 'none';
+  $('stageMeta').hidden = !has;
+  $('toolbar').style.visibility = has ? '' : 'hidden';
+  $('stageGuide').classList.toggle('show', !has);
+  $('practiceTitle').textContent = has ? ('练习 · ' + state.char) : '练习';
+  if(has){
+    $('modelChar').textContent = state.char;
+    var info = LIB_MAP[state.char];
+    $('metaChar').textContent = state.char;
+    $('metaPinyin').textContent = info ? info.p : '';
+    syncFavButtons();
+    syncCanvases();
+    renderGridCanvas();
+    renderInkAll();
+    restoreDraft();
+    applyModelToggle();
+  }
+  switchMode(state.mode === 'free' ? 'free' : 'free');
+}
+/* ============================================================
+   练习记录（P4）
+   ============================================================ */
+function records(){
+  var r = store.get('records', []);
+  return Array.isArray(r) ? r : [];
+}
+function renderStats(){
+  var recs = records();
+  $('statsTotal').textContent = recs.length;
+  var days = {};
+  recs.forEach(function(r){ days[fmtDate(r.ts || Date.now())] = 1; });
+  $('statsDays').textContent = Object.keys(days).length;
+  $('statsFav').textContent = favorites().length;
+}
+function renderRecords(){
+  renderStats();
+  var recs = records();
+  var list = $('recordsList');
+  list.innerHTML = '';
+  if(!recs.length){
+    $('recordsEmpty').hidden = false;
+    return;
+  }
+  $('recordsEmpty').hidden = true;
+  var groups = {}, order = [];
+  recs.forEach(function(r){
+    var key = fmtDate(r.ts || Date.now());
+    if(!groups[key]){ groups[key] = []; order.push(key); }
+    groups[key].push(r);
+  });
+  var today = fmtDate(Date.now());
+  var yesterday = fmtDate(Date.now() - 86400000);
+  order.forEach(function(key){
+    var day = el('div','rec-day');
+    var t = el('h3','rec-day-title');
+    t.textContent = key === today ? '今天' : (key === yesterday ? '昨天' : key);
+    t.appendChild(el('span', null, groups[key].length + ' 篇'));
+    day.appendChild(t);
+    var grid = el('div','rec-grid');
+    groups[key].forEach(function(r){
+      var item = el('button','rec-item');
+      item.type = 'button';
+      item.setAttribute('aria-label', '查看「' + (r.char || '') + '」的作品');
+      var img = el('img');
+      img.src = r.thumb || '';
+      img.alt = (r.char || '') + ' 的练习作品';
+      img.loading = 'lazy';
+      var tag = el('span','rec-tag');
+      tag.textContent = r.char || '';
+      item.appendChild(img);
+      item.appendChild(tag);
+      item.addEventListener('click', function(){ openRecord(r); });
+      grid.appendChild(item);
+    });
+    day.appendChild(grid);
+    list.appendChild(day);
+  });
+}
+function openRecord(r){
+  state.viewingRecord = r;
+  $('recordImg').src = r.thumb || '';
+  $('recordChar').textContent = r.char || '';
+  $('recordTime').textContent = r.ts ? fmtFull(r.ts) : '';
+  $('recordLayer').classList.add('show');
+}
+function closeRecord(){
+  $('recordLayer').classList.remove('show');
+  state.viewingRecord = null;
+}
+/* ============================================================
+   设置抽屉（P5）
+   ============================================================ */
+function openDrawer(){
+  $('drawer').classList.add('open');
+  $('drawer').setAttribute('aria-hidden','false');
+  $('drawerBackdrop').classList.add('show');
+  syncSettingsUI();
+}
+function closeDrawer(){
+  $('drawer').classList.remove('open');
+  $('drawer').setAttribute('aria-hidden','true');
+  $('drawerBackdrop').classList.remove('show');
+}
+function syncSettingsUI(){
+  $all('#themeSeg button').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-v') === settings.theme));
+  });
+  $all('#fontSeg button').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-font-v') === settings.font));
+  });
+  $all('#autosaveSeg button').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-auto-v') === settings.autosave));
+  });
+  var snd = $('btnSound');
+  if(snd) snd.setAttribute('aria-checked', String(!!settings.sound));
+  $all('#penSeg button').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-level') === settings.pen));
+  });
+  $all('#gridSeg button').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-grid') === settings.grid));
+  });
+  applyModelToggle();
+}
+function recalcStage(){
+  if(state.view !== 'practice' || !state.char) return;
+  syncCanvases();
+  renderGridCanvas();
+  if(state.mode === 'free'){
+    renderInkAll();
+  }else{
+    var m = state.mode;
+    hideWriter();
+    state.mode = m;
+    ensureWriter();
+  }
+}
+/* ============================================================
+   数据管理：导出 / 导入 / 清空
+   ============================================================ */
+function exportBackup(){
+  var payload = {
+    app:'molian',
+    version:1,
+    exportedAt:new Date().toISOString(),
+    records:records(),
+    favorites:favorites(),
+    settings:settings
+  };
+  var blob = new Blob([JSON.stringify(payload)], { type:'application/json' });
+  var url = URL.createObjectURL(blob);
+  downloadURI(url, 'molian-backup-' + fmtDate(Date.now()).replace(/-/g, '') + '.json');
+  setTimeout(function(){ try{ URL.revokeObjectURL(url); }catch(e){} }, 2000);
+  toast('备份文件已导出');
+}
+function importBackup(file){
+  var reader = new FileReader();
+  reader.onload = function(){
+    var data;
+    try{ data = JSON.parse(reader.result); }
+    catch(e){ toast('备份文件解析失败'); return; }
+    var recs = Array.isArray(data.records) ? data.records : null;
+    var favs = Array.isArray(data.favorites) ? data.favorites : null;
+    if(!recs && !favs){ toast('备份文件格式不正确'); return; }
+    confirmDialog({
+      title:'导入恢复',
+      body:'导入将覆盖当前的练习记录与收藏，确定继续？建议先导出备份。',
+      confirmText:'覆盖导入'
+    }).then(function(ok){
+      if(!ok){ toast('已取消导入'); return; }
+      if(recs) store.set('records', recs);
+      if(favs) store.set('favorites', favs);
+      if(data.settings && typeof data.settings === 'object'){
+        settings = Object.assign(settings, data.settings);
+        applyTheme();
+        applyFont();
+        saveSettings();
+      }
+      syncSettingsUI();
+      toast('已从备份恢复');
+      if(state.view === 'records') renderRecords();
+      if(state.view === 'home') renderGrid();
+      syncFavButtons();
+    });
+  };
+  reader.readAsText(file);
+}
+function clearAllData(){
+  confirmDialog({
+    title:'清空全部数据',
+    body:'将删除所有练习记录、收藏与草稿，且不可恢复。建议先导出备份。确定清空？',
+    confirmText:'确认清空',
+    danger:true
+  }).then(function(ok){
+    if(!ok) return;
+    try{
+      var keys = [];
+      for(var i = 0; i < localStorage.length; i++){
+        var k = localStorage.key(i);
+        if(k && k.indexOf('molian_') === 0) keys.push(k);
+      }
+      keys.forEach(function(k){ localStorage.removeItem(k); });
+    }catch(e){}
+    toast('已清空全部数据，正在重新载入');
+    setTimeout(function(){ try{ location.reload(); }catch(e){} }, 900);
+  });
+}
+/* ============================================================
+   事件绑定
+   ============================================================ */
+function bindAll(){
+  /* 导航 */
+  $('brandHome').addEventListener('click', function(){ route('home'); });
+  $('navHome').addEventListener('click', function(){ route('home'); });
+  $('navPractice').addEventListener('click', function(){ route('practice'); });
+  $('navRecords').addEventListener('click', function(){ route('records'); });
+  $('practiceBack').addEventListener('click', function(){ route('home'); });
+  $('recordsBack').addEventListener('click', function(){ route('home'); });
+  $('btnGuideHome').addEventListener('click', function(){ route('home'); });
+  $('btnRecordsPractice').addEventListener('click', function(){ route('practice'); });
+  $('todayCard').addEventListener('click', function(){ openPractice(todayFeature().c); });
+  /* 搜索（防抖 200ms，最多呈现前 50 条） */
+  var searchTimer = null;
+  $('searchInput').addEventListener('input', function(){
+    var v = this.value;
+    $('searchClear').hidden = !v;
+    if(searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(function(){
+      state.query = v;
+      renderGrid();
+    }, 200);
+  });
+  $('searchInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+      var list = filterChars();
+      if(list.length === 1){ openPractice(list[0].c); }
+      else if(list.length > 1){ toast('找到 ' + list.length + ' 个字，点字卡开始练习'); }
+    }
+  });
+  $('searchClear').addEventListener('click', function(){
+    $('searchInput').value = '';
+    state.query = '';
+    this.hidden = true;
+    renderGrid();
+    try{ $('searchInput').focus(); }catch(e){}
+  });
+  /* 分类页签 */
+  $all('#tabBar .tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      $all('#tabBar .tab').forEach(function(x){ x.setAttribute('aria-selected','false'); });
+      t.setAttribute('aria-selected','true');
+      state.tab = t.getAttribute('data-tab');
+      state.grade = 'all';
+      state.radical = 'all';
+      renderGrid();
+    });
+  });
+  /* 分页加载更多 */
+  $('btnLoadMore').addEventListener('click', function(){
+    state.shown += PAGE_SIZE;
+    renderGrid();
+  });
+  /* 练习模式 */
+  $all('#modeSeg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      if(!state.char){ toast('请先到首页选择一个字'); return; }
+      switchMode(b.getAttribute('data-mode'));
+    });
+  });
+  $('btnPlay').addEventListener('click', playOrder);
+  $('btnReplay').addEventListener('click', function(){
+    stopOrder();
+    setTimeout(playOrder, 80);
+  });
+  $('btnQuizRestart').addEventListener('click', function(){
+    if(state.writer) startQuiz();
+  });
+  $('btnFallbackFree').addEventListener('click', function(){
+    $('stageFallback').classList.remove('show');
+    switchMode('free');
+  });
+  /* 工具栏 */
+  $all('#penSeg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      settings.pen = b.getAttribute('data-level');
+      saveSettings();
+      syncSettingsUI();
+    });
+  });
+  $all('#gridSeg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      settings.grid = b.getAttribute('data-grid');
+      saveSettings();
+      syncSettingsUI();
+      renderGridCanvas();
+    });
+  });
+  $('btnModel').addEventListener('click', function(){
+    settings.model = !settings.model;
+    saveSettings();
+    applyModelToggle();
+  });
+  $('btnUndo').addEventListener('click', undo);
+  $('btnClear').addEventListener('click', clearStage);
+  $('btnSave').addEventListener('click', savePractice);
+  $('metaFav').addEventListener('click', function(){
+    if(state.char) toggleFav(state.char);
+  });
+  /* 画布书写 */
+  var ink = $('inkCanvas');
+  ink.addEventListener('pointerdown', onPenDown);
+  ink.addEventListener('pointermove', onPenMove);
+  ink.addEventListener('pointerup', onPenUp);
+  ink.addEventListener('pointercancel', onPenUp);
+  ink.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  /* 设置抽屉 */
+  $('btnSettings').addEventListener('click', openDrawer);
+  $('btnDrawerClose').addEventListener('click', closeDrawer);
+  $('drawerBackdrop').addEventListener('click', closeDrawer);
+  $all('#themeSeg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      settings.theme = b.getAttribute('data-theme-v');
+      applyTheme();
+      saveSettings();
+      syncSettingsUI();
+      recalcStage();
+      toast(settings.theme === 'dark' ? '已切换到墨色夜间' : '已切换到宣纸日间');
+    });
+  });
+  $all('#fontSeg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      settings.font = b.getAttribute('data-font-v');
+      applyFont();
+      saveSettings();
+      syncSettingsUI();
+      toast('范字字体已切换');
+    });
+  });
+  $all('#autosaveSeg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      settings.autosave = b.getAttribute('data-auto-v');
+      saveSettings();
+      syncSettingsUI();
+    });
+  });
+  $('btnSound').addEventListener('click', function(){
+    settings.sound = !settings.sound;
+    sfx.setOn(settings.sound);
+    saveSettings();
+    syncSettingsUI();
+    if(settings.sound) toast('书写音效已开启');
+  });
+  $('btnExport').addEventListener('click', exportBackup);
+  $('btnImport').addEventListener('click', function(){ $('importFile').click(); });
+  $('importFile').addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    this.value = '';
+    if(f) importBackup(f);
+  });
+  $('btnClearData').addEventListener('click', clearAllData);
+  /* 记录弹层 */
+  $('btnRecordClose').addEventListener('click', closeRecord);
+  $('recordLayer').addEventListener('click', function(e){ if(e.target === this) closeRecord(); });
+  $('btnRecordDelete').addEventListener('click', function(){
+    var r = state.viewingRecord;
+    if(!r) return;
+    var recs = records().filter(function(x){ return x.id !== r.id; });
+    store.set('records', recs);
+    closeRecord();
+    renderRecords();
+    toast('已删除该条记录');
+  });
+  /* 键盘快捷键 */
+  document.addEventListener('keydown', function(e){
+    var tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+    if(tag === 'input' || tag === 'textarea') return;
+    var mod = e.ctrlKey || e.metaKey;
+    if(mod && (e.key === 'z' || e.key === 'Z')){
+      if(state.view !== 'practice') return;
+      e.preventDefault();
+      undo();
+    }else if(mod && (e.key === 's' || e.key === 'S')){
+      if(state.view !== 'practice') return;
+      e.preventDefault();
+      savePractice();
+    }else if(e.key === 'Escape'){
+      if($('recordLayer').classList.contains('show')) closeRecord();
+      else if($('confirmLayer').classList.contains('show')) closeConfirm(false);
+      else closeDrawer();
+    }
+  });
+  /* 尺寸变化 */
+  var resizeTimer = null;
+  function onResize(){
+    if(resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(recalcStage, 160);
+  }
+  if(window.ResizeObserver){
+    try{ new ResizeObserver(onResize).observe($('stage')); }
+    catch(e){ window.addEventListener('resize', onResize); }
+  }else{
+    window.addEventListener('resize', onResize);
+  }
+  /* 路由 hash */
+  window.addEventListener('hashchange', function(){
+    var h = (location.hash || '').replace('#','');
+    if(h && h !== state.view && ['home','practice','records'].indexOf(h) >= 0) route(h);
+  });
+}
+/* ============================================================
+   启动
+   ============================================================ */
+function init(){
+  applyTheme();
+  applyFont();
+  var hash = (location.hash || '').replace('#','');
+  route((hash === 'practice' || hash === 'records') ? hash : 'home');
+  bindAll();
+  syncSettingsUI();
+  /* 完整字库延迟加载，不阻塞首屏 */
+  setTimeout(function(){ loadFullLibrary(false); }, 1500);
+}
+init();
+})();
+</script>
+</body>
+</html>
